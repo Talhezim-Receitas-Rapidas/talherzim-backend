@@ -1,0 +1,37 @@
+{
+  "name": "talherzim-backend",
+  "version": "1.0.0",
+  "description": "Back-end do Talherzim: organizador de receitas por ingredientes disponíveis.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "migrate": "node -e \"require('dotenv').config(); const {loadConfig}=require('./src/config'); const {createPool}=require('./src/db/pool'); const {migrate}=require('./src/db/migrate'); const c=loadConfig(); const p=createPool(c.databaseUrl); migrate(p).then(()=>{console.log('migrations ok'); return p.end();})\"",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "test:unit": "jest --runInBand --detectOpenHandles --forceExit src/tests/auth.unit.test.js",
+    "test:integration": "jest --runInBand --detectOpenHandles --forceExit src/tests/auth.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Talhezim-Receitas-Rapidas/talherzim-backend.git"
+  },
+  "license": "MIT",
+  "type": "commonjs",
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["<rootDir>/src/tests/**/*.test.js"],
+    "testTimeout": 120000
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@testcontainers/postgresql": "^10.16.0",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}
