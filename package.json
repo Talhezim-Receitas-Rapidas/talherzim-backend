@@ -7,8 +7,9 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "migrate": "node -e \"require('dotenv').config(); const {loadConfig}=require('./src/config'); const {createPool}=require('./src/db/pool'); const {migrate}=require('./src/db/migrate'); const c=loadConfig(); const p=createPool(c.databaseUrl); migrate(p).then(()=>{console.log('migrations ok'); return p.end();})\"",
+    "seed:recipes": "node src/scripts/importDataset.js",
     "test": "jest --runInBand --detectOpenHandles --forceExit",
-    "test:unit": "jest --runInBand --detectOpenHandles --forceExit src/tests/auth.unit.test.js",
+    "test:unit": "jest --runInBand --detectOpenHandles --forceExit --testPathPattern=unit.test",
     "test:integration": "jest --runInBand --detectOpenHandles --forceExit src/tests/auth.test.js"
   },
   "repository": {

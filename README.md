@@ -49,3 +49,10 @@ npm run test:integration
 npm test
 ```
 
+## Dataset e Carga de Receitas (S1-07)
+
+Para importar ou atualizar o dataset estático de receitas (`src/data/receitas.json`) no banco PostgreSQL de forma idempotente:
+
+```bash
+npm run seed:recipes
+```
