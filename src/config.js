@@ -5,11 +5,11 @@ function databaseUrl() {
     return process.env.DATABASE_URL;
   }
 
-  const user = process.env.DB_USER || 'talherzim';
-  const password = process.env.DB_PASS || 'talherzim123';
-  const host = process.env.DB_HOST || 'localhost';
-  const port = process.env.DB_PORT || '5432';
-  const name = process.env.DB_NAME || 'talherzim';
+  const user = process.env.POSTGRES_USER;
+  const password = process.env.POSTGRES_PASSWORD;
+  const host = process.env.POSTGRES_HOST;
+  const port = process.env.POSTGRES_PORT;
+  const name = process.env.POSTGRES_DB;
   return `postgres://${user}:${password}@${host}:${port}/${name}`;
 }
 
