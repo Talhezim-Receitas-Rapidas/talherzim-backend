@@ -5,7 +5,7 @@
 class RecipeProvider {
   /**
    * Busca receitas que utilizam um ou mais ingredientes informados.
-   * @param {string[]} _ingredientes 
+   * @param {string[]} _ingredientes
    * @returns {Promise<Array>}
    */
   async buscarReceitas(_ingredientes) {

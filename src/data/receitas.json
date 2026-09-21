@@ -69,7 +69,14 @@
     "modo_preparo": "1. Em uma caneca de 300 ml, misture a farinha de trigo, chocolate em pó e açúcar.\n2. Adicione o leite e o óleo, misturando até ficar homogêneo.\n3. Acrescente o fermento em pó e mexa delicadamente.\n4. Leve ao micro-ondas em potência alta por 1 minuto e 30 segundos.",
     "imagem_url": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600",
     "fonte": "estatico",
-    "ingredientes": ["farinha de trigo", "chocolate em po", "acucar", "leite", "oleo", "fermento em po"]
+    "ingredientes": [
+      "farinha de trigo",
+      "chocolate em po",
+      "acucar",
+      "leite",
+      "oleo",
+      "fermento em po"
+    ]
   },
   {
     "fonte_id": "estatico-010",
@@ -77,7 +84,14 @@
     "modo_preparo": "1. Em uma panela, refogue o alho com peito de frango em cubos e sal até dourar.\n2. Acrescente o molho de tomate e a mostarda, mexendo por 2 minutos.\n3. Reduza o fogo, adicione o creme de leite e misture sem deixar ferver.\n4. Desligue o fogo e sirva acompanhado de arroz ou batata palha.",
     "imagem_url": "https://images.unsplash.com/photo-1547496502-affa22d38842?w=600",
     "fonte": "estatico",
-    "ingredientes": ["peito de frango", "creme de leite", "molho de tomate", "mostarda", "alho", "sal"]
+    "ingredientes": [
+      "peito de frango",
+      "creme de leite",
+      "molho de tomate",
+      "mostarda",
+      "alho",
+      "sal"
+    ]
   },
   {
     "fonte_id": "estatico-011",

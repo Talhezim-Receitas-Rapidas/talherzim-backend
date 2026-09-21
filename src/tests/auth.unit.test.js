@@ -92,9 +92,9 @@ describe('Testes Unitários - S1-04 Autenticação', () => {
         dbError.code = '23505';
         mockPool.query.mockRejectedValueOnce(dbError);
 
-        await expect(authService.registrar('jaexiste@exemplo.com', 'senhaSegura123')).rejects.toThrow(
-          AuthError
-        );
+        await expect(
+          authService.registrar('jaexiste@exemplo.com', 'senhaSegura123'),
+        ).rejects.toThrow(AuthError);
       });
 
       it('deve propagar outros erros desconhecidos do banco', async () => {
@@ -102,7 +102,7 @@ describe('Testes Unitários - S1-04 Autenticação', () => {
         mockPool.query.mockRejectedValueOnce(genericError);
 
         await expect(authService.registrar('erro@exemplo.com', 'senhaSegura123')).rejects.toThrow(
-          'falha de conexão'
+          'falha de conexão',
         );
       });
     });
@@ -128,7 +128,7 @@ describe('Testes Unitários - S1-04 Autenticação', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [] });
 
         await expect(authService.login('naoexiste@exemplo.com', 'senha1234')).rejects.toThrow(
-          new AuthError('credenciais_invalidas', 401)
+          new AuthError('credenciais_invalidas', 401),
         );
       });
 
@@ -139,7 +139,7 @@ describe('Testes Unitários - S1-04 Autenticação', () => {
         });
 
         await expect(authService.login('senha@exemplo.com', 'senhaErrada123')).rejects.toThrow(
-          new AuthError('credenciais_invalidas', 401)
+          new AuthError('credenciais_invalidas', 401),
         );
       });
     });
@@ -261,10 +261,10 @@ describe('Testes Unitários - S1-04 Autenticação', () => {
     it('criar deve inserir e retornar o registro criado', async () => {
       mockPool.query.mockResolvedValueOnce({ rows: [{ id: '123', email: 'a@b.com' }] });
       const res = await UsuarioModel.criar(mockPool, 'a@b.com', 'hash123');
-      expect(mockPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO usuarios'),
-        ['a@b.com', 'hash123']
-      );
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO usuarios'), [
+        'a@b.com',
+        'hash123',
+      ]);
       expect(res).toEqual({ id: '123', email: 'a@b.com' });
     });
 

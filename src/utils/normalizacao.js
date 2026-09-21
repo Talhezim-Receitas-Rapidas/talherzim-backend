@@ -1,6 +1,6 @@
 /**
  * Normaliza o nome do ingrediente para padronização no banco e matching case-insensitive.
- * @param {string} nome 
+ * @param {string} nome
  * @returns {string}
  */
 function normalizarNomeIngrediente(nome) {
@@ -8,10 +8,7 @@ function normalizarNomeIngrediente(nome) {
     return '';
   }
 
-  return nome
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, ' ');
+  return nome.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 module.exports = { normalizarNomeIngrediente };
