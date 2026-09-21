@@ -61,25 +61,6 @@ docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
   psql -U "$DB_USER" -d "$DB_NAME" -c "\du" | grep -q "$DB_USER"
 echo "OK: role '$DB_USER' existe"
 
-echo "==> Debug: databases existentes"
-docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
-  psql -U "$DB_USER" -d "$DB_NAME" -c "\l"
-
-echo "==> Debug: schemas existentes"
-docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
-  psql -U "$DB_USER" -d "$DB_NAME" -c "\dn"
-
-echo "==> Debug: todas as tabelas (qualquer schema)"
-docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
-  psql -U "$DB_USER" -d "$DB_NAME" -c "\dt *.*"
-
-echo "==> Debug: conteúdo do initdb.d"
-docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
-  ls -la /docker-entrypoint-initdb.d/
-
-echo "==> Debug: log do postgres procurando por 'running'"
-docker compose -f "$COMPOSE_FILE" logs "$SERVICE" | grep -i "running\|initdb\|schema\|CREATE"
-
 echo "==> Verificando logs por erros fatais"
 if docker compose -f "$COMPOSE_FILE" logs "$SERVICE" 2>&1 | grep -E "FATAL|PANIC"; then
   echo "ERRO: encontrados erros fatais no log do Postgres"
