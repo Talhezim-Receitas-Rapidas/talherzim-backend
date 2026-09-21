@@ -1,4 +1,4 @@
-name: CI - Validação docker-compose e Postgres
+name: CI
 
 on:
   push:
