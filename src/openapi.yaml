@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: Talherzim API - Autenticação (S1-04)
+  description: Contrato de autenticação do Talherzim, com registro de usuário, login, logout e consulta de sessão.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desenvolvimento local
+
+paths:
+  /auth/register:
+    post:
+      summary: Cadastro de novo usuário
+      description: Cria uma nova conta de usuário com senha criptografada via bcrypt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredenciaisRequest'
+      responses:
+        '201':
+          description: Usuário cadastrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '409':
+          description: Conflito de e-mail duplicado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              example:
+                erro: email_duplicado
+                campos: []
+        '422':
+          description: Dados de entrada inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              example:
+                erro: dados_invalidos
+                campos:
+                  - campo: email
+                    mensagem: E-mail inválido.
+                  - campo: senha
+                    mensagem: A senha deve ter ao menos 8 caracteres.
+
+  /auth/login:
+    post:
+      summary: Login de usuário
+      description: Autentica o usuário e gera um token JWT de sessão.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredenciaisRequest'
+      responses:
+        '200':
+          description: Login efetuado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciais incorretas ou usuário inexistente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              example:
+                erro: credenciais_invalidas
+                campos: []
+        '422':
+          description: Dados de entrada inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+
+  /auth/logout:
+    post:
+      summary: Logout do usuário
+      description: Encerra a sessão ativa invalidando o identificador do token JWT (jti).
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Sessão finalizada com sucesso.
+        '401':
+          description: Não autenticado ou token inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              examples:
+                nao_autenticado:
+                  value:
+                    erro: nao_autenticado
+                    campos: []
+                token_invalido:
+                  value:
+                    erro: token_invalido
+                    campos: []
+
+  /auth/me:
+    get:
+      summary: Dados do usuário autenticado
+      description: Retorna os dados do titular do token JWT (RNF03).
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dados do usuário retornado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '401':
+          description: Não autenticado ou token inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CredenciaisRequest:
+      type: object
+      required:
+        - email
+        - senha
+      properties:
+        email:
+          type: string
+          format: email
+          example: usuario@exemplo.com
+        senha:
+          type: string
+          minLength: 8
+          example: senhaSegura123
+
+    UsuarioResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        email:
+          type: string
+          format: email
+          example: usuario@exemplo.com
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        usuario:
+          $ref: '#/components/schemas/UsuarioResponse'
+
+    ErroCampo:
+      type: object
+      properties:
+        campo:
+          type: string
+          example: email
+        mensagem:
+          type: string
+          example: E-mail inválido.
+
+    ErroResponse:
+      type: object
+      properties:
+        erro:
+          type: string
+          example: dados_invalidos
+        campos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErroCampo'

@@ -1,0 +1,122 @@
+[
+  {
+    "fonte_id": "estatico-001",
+    "nome": "Omelete Simples de Queijo",
+    "modo_preparo": "1. Bata os ovos em uma tigela com uma pitada de sal.\n2. Aqueça uma frigideira em fogo médio e derreta a manteiga.\n3. Despeje os ovos batidos e deixe cozinhar até as bordas firmarem.\n4. Distribua o queijo sobre a metade da omelete, dobre e sirva quente.",
+    "imagem_url": "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["ovo", "queijo", "manteiga", "sal"]
+  },
+  {
+    "fonte_id": "estatico-002",
+    "nome": "Arroz com Ovo Frito e Cebolinha",
+    "modo_preparo": "1. Em uma frigideira, aqueça o óleo e frite o ovo temperado com sal a gosto.\n2. Em um prato, sirva uma porção de arroz aquecido.\n3. Coloque o ovo frito sobre o arroz com a gema no ponto desejado.\n4. Salpique cebolinha picada por cima e sirva imediatamente.",
+    "imagem_url": "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["arroz", "ovo", "cebolinha", "oleo", "sal"]
+  },
+  {
+    "fonte_id": "estatico-003",
+    "nome": "Macarrão Alho e Óleo",
+    "modo_preparo": "1. Cozinhe o macarrão em água fervente com sal até ficar al dente.\n2. Em uma frigideira larga, doure o alho laminado no azeite em fogo baixo sem queimar.\n3. Escorra o macarrão e junte diretamente à frigideira com o azeite aromático.\n4. Misture bem, tempere com pimenta-do-reino e sirva.",
+    "imagem_url": "https://images.unsplash.com/photo-1621996346565-e3d5d6281699?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["macarrao", "alho", "azeite", "sal", "pimenta-do-reino"]
+  },
+  {
+    "fonte_id": "estatico-004",
+    "nome": "Tapioca Recheada de Queijo e Presunto",
+    "modo_preparo": "1. Peneire a goma de tapioca diretamente em uma frigideira antiaderente pré-aquecida.\n2. Espalhe uniformemente formando um disco homogêneo.\n3. Quando a massa unir, espalhe uma camada fina de manteiga, adicione o queijo e o presunto.\n4. Dobre a tapioca ao meio e deixe o queijo derreter.",
+    "imagem_url": "https://images.unsplash.com/photo-1513442543415-1a61f74b3017?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["goma de tapioca", "queijo", "presunto", "manteiga"]
+  },
+  {
+    "fonte_id": "estatico-005",
+    "nome": "Panqueca Básica",
+    "modo_preparo": "1. Bata no liquidificador ou com um fouet a farinha de trigo, leite, ovo, óleo e sal até obter massa lisa.\n2. Pincele uma frigideira com óleo e coloque uma concha rasa da massa.\n3. Doure dos dois lados em fogo médio e reserve para rechear como preferir.",
+    "imagem_url": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["farinha de trigo", "leite", "ovo", "oleo", "sal"]
+  },
+  {
+    "fonte_id": "estatico-006",
+    "nome": "Filé de Frango Grelhado com Limão e Alho",
+    "modo_preparo": "1. Tempere os filés de peito de frango com alho amassado, suco de limão e sal.\n2. Aqueça o azeite em uma frigideira ou grelha bem quente.\n3. Grelhe os filés por cerca de 4 minutos de cada lado até ficarem dourados e suculentos.",
+    "imagem_url": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["peito de frango", "alho", "limao", "azeite", "sal"]
+  },
+  {
+    "fonte_id": "estatico-007",
+    "nome": "Purê de Batatas Cremoso",
+    "modo_preparo": "1. Cozinhe as batatas descascadas em água com sal até ficarem bem macias.\n2. Escorra e amasse as batatas ainda quentes.\n3. Em uma panela, misture as batatas com a manteiga e adicione o leite aos poucos em fogo baixo até atingir consistência aveludada.\n4. Ajuste o sal e sirva.",
+    "imagem_url": "https://images.unsplash.com/photo-1618449840665-9ed506d73a34?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["batata", "leite", "manteiga", "sal"]
+  },
+  {
+    "fonte_id": "estatico-008",
+    "nome": "Salada de Frutas Rápida",
+    "modo_preparo": "1. Pique a banana, a maçã e o mamão em cubos pequenos.\n2. Esprema a laranja para obter o suco fresco.\n3. Em uma tigela, junte as frutas picadas com o suco de laranja.\n4. Finalize com fios de leite condensado e leve para gelar antes de servir.",
+    "imagem_url": "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["banana", "maca", "laranja", "mamao", "leite condensado"]
+  },
+  {
+    "fonte_id": "estatico-009",
+    "nome": "Bolo de Caneca de Chocolate",
+    "modo_preparo": "1. Em uma caneca de 300 ml, misture a farinha de trigo, chocolate em pó e açúcar.\n2. Adicione o leite e o óleo, misturando até ficar homogêneo.\n3. Acrescente o fermento em pó e mexa delicadamente.\n4. Leve ao micro-ondas em potência alta por 1 minuto e 30 segundos.",
+    "imagem_url": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["farinha de trigo", "chocolate em po", "acucar", "leite", "oleo", "fermento em po"]
+  },
+  {
+    "fonte_id": "estatico-010",
+    "nome": "Estrogonofe Rápido de Frango",
+    "modo_preparo": "1. Em uma panela, refogue o alho com peito de frango em cubos e sal até dourar.\n2. Acrescente o molho de tomate e a mostarda, mexendo por 2 minutos.\n3. Reduza o fogo, adicione o creme de leite e misture sem deixar ferver.\n4. Desligue o fogo e sirva acompanhado de arroz ou batata palha.",
+    "imagem_url": "https://images.unsplash.com/photo-1547496502-affa22d38842?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["peito de frango", "creme de leite", "molho de tomate", "mostarda", "alho", "sal"]
+  },
+  {
+    "fonte_id": "estatico-011",
+    "nome": "Batata Rústica Crocante",
+    "modo_preparo": "1. Lave bem as batatas e corte em gomos com casca.\n2. Disponha em uma assadeira, regue com azeite e tempere com alho amassado, alecrim e sal.\n3. Asse em forno pré-aquecido a 200°C por cerca de 35 a 40 minutos até dourar e ficar crocante.",
+    "imagem_url": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["batata", "azeite", "sal", "alecrim", "alho"]
+  },
+  {
+    "fonte_id": "estatico-012",
+    "nome": "Crepioca Proteica",
+    "modo_preparo": "1. Em um prato fundo, bata o ovo com a goma de tapioca e uma pitada de sal até dissolver.\n2. Despeje em frigideira quente antiaderente levemente untada.\n3. Quando dourar a base, adicione o queijo, dobre ao meio e deixe o queijo derreter.",
+    "imagem_url": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["goma de tapioca", "ovo", "sal", "queijo"]
+  },
+  {
+    "fonte_id": "estatico-013",
+    "nome": "Misto Quente Crocante com Orégano",
+    "modo_preparo": "1. Passe manteiga na parte externa das fatias de pão de forma.\n2. Recheie com queijo, presunto e uma pitada de orégano.\n3. Leve à frigideira ou sanduicheira até o pão dourar e o queijo derreter completamente.",
+    "imagem_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["pao de forma", "queijo", "presunto", "manteiga", "oregano"]
+  },
+  {
+    "fonte_id": "estatico-014",
+    "nome": "Molho de Tomate Rústico com Manjericão",
+    "modo_preparo": "1. Em uma panela, aqueça o azeite e doure a cebola e o alho picados.\n2. Adicione os tomates picados e tempere com sal.\n3. Deixe cozinhar em fogo baixo por cerca de 15 minutos até os tomates desmancharem.\n4. Finalize com folhas frescas de manjericão.",
+    "imagem_url": "https://images.unsplash.com/photo-1572449043416-55f4685c9bb7?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["tomate", "cebola", "alho", "azeite", "sal", "manjericao"]
+  },
+  {
+    "fonte_id": "estatico-015",
+    "nome": "Pipoca Caseira na Manteiga",
+    "modo_preparo": "1. Aqueça o óleo e uma colher de manteiga em uma panela com tampa.\n2. Adicione os grãos de milho de pipoca e tampe a panela.\n3. Agite a panela fechada sobre o fogo até os estouros cessarem.\n4. Despeje em uma vasilha, regue com o restante da manteiga derretida e salgue a gosto.",
+    "imagem_url": "https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=600",
+    "fonte": "estatico",
+    "ingredientes": ["milho de pipoca", "manteiga", "oleo", "sal"]
+  }
+]
