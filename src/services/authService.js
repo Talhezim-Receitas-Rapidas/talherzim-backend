@@ -45,11 +45,9 @@ class AuthService {
     }
 
     const jti = crypto.randomUUID();
-    const token = jwt.sign(
-      { sub: usuario.id, email: usuario.email, jti },
-      this.config.jwtSecret,
-      { expiresIn: this.config.jwtExpiresIn }
-    );
+    const token = jwt.sign({ sub: usuario.id, email: usuario.email, jti }, this.config.jwtSecret, {
+      expiresIn: this.config.jwtExpiresIn,
+    });
 
     return {
       token,

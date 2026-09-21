@@ -70,10 +70,9 @@ describe('S1-04 autenticação', () => {
       expect(res.body).not.toHaveProperty('senha');
       expect(res.body).not.toHaveProperty('senha_hash');
 
-      const { rows } = await pool.query(
-        'SELECT senha_hash FROM usuarios WHERE email = $1',
-        ['usuario@exemplo.com']
-      );
+      const { rows } = await pool.query('SELECT senha_hash FROM usuarios WHERE email = $1', [
+        'usuario@exemplo.com',
+      ]);
       expect(rows[0].senha_hash).not.toBe('senhaSegura123');
       expect(rows[0].senha_hash.startsWith('$2')).toBe(true);
     });
@@ -86,9 +85,7 @@ describe('S1-04 autenticação', () => {
     it('retorna 422 para e-mail inválido', async () => {
       const res = await cadastrar('email-invalido').expect(422);
       expect(res.body.erro).toBe('dados_invalidos');
-      expect(res.body.campos).toEqual([
-        { campo: 'email', mensagem: 'E-mail inválido.' },
-      ]);
+      expect(res.body.campos).toEqual([{ campo: 'email', mensagem: 'E-mail inválido.' }]);
     });
 
     it('retorna 422 para senha curta', async () => {

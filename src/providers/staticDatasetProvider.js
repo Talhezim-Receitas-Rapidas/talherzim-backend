@@ -40,7 +40,9 @@ class StaticDatasetProvider extends RecipeProvider {
 
     this.receitasCache = dadosBrutos.map((item, index) => {
       if (!item.nome || !item.modo_preparo) {
-        throw new Error(`Receita inválida no índice ${index}: nome e modo_preparo são obrigatórios.`);
+        throw new Error(
+          `Receita inválida no índice ${index}: nome e modo_preparo são obrigatórios.`,
+        );
       }
 
       const ingredientesBrutos = Array.isArray(item.ingredientes) ? item.ingredientes : [];
@@ -82,13 +84,13 @@ class StaticDatasetProvider extends RecipeProvider {
     }
 
     const setIngredientesBusca = new Set(
-      ingredientes.map(normalizarNomeIngrediente).filter(Boolean)
+      ingredientes.map(normalizarNomeIngrediente).filter(Boolean),
     );
 
     const comCorrespondencia = todas
       .map((receita) => {
         const correspondencias = receita.ingredientes.filter((ing) =>
-          setIngredientesBusca.has(ing)
+          setIngredientesBusca.has(ing),
         );
         return {
           ...receita,

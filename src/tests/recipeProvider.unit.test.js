@@ -60,10 +60,10 @@ describe('S1-07 — Dataset de receitas e provider', () => {
     it('deve lançar erro se os métodos abstratos não forem implementados', async () => {
       const base = new RecipeProvider();
       await expect(base.buscarReceitas(['ovo'])).rejects.toThrow(
-        'Método buscarReceitas() deve ser implementado pela subclasse.'
+        'Método buscarReceitas() deve ser implementado pela subclasse.',
       );
       await expect(base.obterTodasReceitas()).rejects.toThrow(
-        'Método obterTodasReceitas() deve ser implementado pela subclasse.'
+        'Método obterTodasReceitas() deve ser implementado pela subclasse.',
       );
     });
   });
@@ -153,7 +153,7 @@ describe('S1-07 — Dataset de receitas e provider', () => {
       expect(res).toEqual({ id: 'uuid-rec-1', nome: 'Bolo' });
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('ON CONFLICT (fonte, fonte_id)'),
-        expect.arrayContaining(['Bolo', 'estatico', 'estatico-001'])
+        expect.arrayContaining(['Bolo', 'estatico', 'estatico-001']),
       );
     });
 
@@ -164,15 +164,15 @@ describe('S1-07 — Dataset de receitas e provider', () => {
 
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('DELETE FROM receita_ingredientes WHERE receita_id = $1'),
-        ['rec-1']
+        ['rec-1'],
       );
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO receita_ingredientes'),
-        ['rec-1', 'ovo']
+        ['rec-1', 'ovo'],
       );
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO receita_ingredientes'),
-        ['rec-1', 'leite']
+        ['rec-1', 'leite'],
       );
     });
 
@@ -208,9 +208,11 @@ describe('S1-07 — Dataset de receitas e provider', () => {
         .mockRejectedValueOnce(new Error('Erro no banco')); // Falha no upsert
 
       const providerMock = {
-        obterTodasReceitas: jest.fn().mockResolvedValue([
-          { fonte_id: 'id-1', nome: 'Erro', modo_preparo: 'X', ingredientes: [] },
-        ]),
+        obterTodasReceitas: jest
+          .fn()
+          .mockResolvedValue([
+            { fonte_id: 'id-1', nome: 'Erro', modo_preparo: 'X', ingredientes: [] },
+          ]),
       };
 
       await expect(importarDataset(mockPool, providerMock)).rejects.toThrow('Erro no banco');

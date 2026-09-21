@@ -6,8 +6,8 @@ const { ReceitaModel } = require('../models/receitaModel');
 
 /**
  * Função de importação idempotente do dataset para o PostgreSQL.
- * @param {import('pg').Pool} pool 
- * @param {StaticDatasetProvider} [provider] 
+ * @param {import('pg').Pool} pool
+ * @param {StaticDatasetProvider} [provider]
  * @returns {Promise<number>} Quantidade de receitas importadas/atualizadas.
  */
 async function importarDataset(pool, provider = new StaticDatasetProvider()) {

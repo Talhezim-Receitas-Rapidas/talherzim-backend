@@ -3,8 +3,8 @@ const { normalizarNomeIngrediente } = require('../utils/normalizacao');
 class ReceitaModel {
   /**
    * Insere ou atualiza uma receita com base na chave única (fonte, fonte_id).
-   * @param {import('pg').Pool|import('pg').PoolClient} client 
-   * @param {Object} receita 
+   * @param {import('pg').Pool|import('pg').PoolClient} client
+   * @param {Object} receita
    * @returns {Promise<Object>}
    */
   static async upsert(client, receita) {
@@ -23,7 +23,7 @@ class ReceitaModel {
         receita.imagem_url || null,
         receita.fonte || 'estatico',
         receita.fonte_id,
-      ]
+      ],
     );
 
     return rows[0];
@@ -31,9 +31,9 @@ class ReceitaModel {
 
   /**
    * Sincroniza os ingredientes de uma receita de forma idempotente.
-   * @param {import('pg').Pool|import('pg').PoolClient} client 
-   * @param {string} receitaId 
-   * @param {string[]} ingredientes 
+   * @param {import('pg').Pool|import('pg').PoolClient} client
+   * @param {string} receitaId
+   * @param {string[]} ingredientes
    */
   static async sincronizarIngredientes(client, receitaId, ingredientes) {
     await client.query('DELETE FROM receita_ingredientes WHERE receita_id = $1', [receitaId]);
@@ -46,15 +46,15 @@ class ReceitaModel {
       await client.query(
         `INSERT INTO receita_ingredientes (receita_id, nome_ingrediente)
          VALUES ($1, $2)`,
-        [receitaId, ing]
+        [receitaId, ing],
       );
     }
   }
 
   /**
    * Busca receita por ID trazendo seus ingredientes associados.
-   * @param {import('pg').Pool} pool 
-   * @param {string} id 
+   * @param {import('pg').Pool} pool
+   * @param {string} id
    * @returns {Promise<Object|null>}
    */
   static async buscarPorId(pool, id) {
@@ -76,7 +76,7 @@ class ReceitaModel {
 
   /**
    * Lista todas as receitas com seus ingredientes associados.
-   * @param {import('pg').Pool} pool 
+   * @param {import('pg').Pool} pool
    * @returns {Promise<Array>}
    */
   static async listarTodas(pool) {
