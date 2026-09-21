@@ -1,144 +1,212 @@
 openapi: 3.0.3
+
 info:
-  title: Talherzim API - Autenticação (S1-04)
-  description: Contrato de autenticação do Talherzim, com registro de usuário, login, logout e consulta de sessão.
+  title: Talherzim API
+  description: |
+    Contrato da API do **Talherzim** — organizador de receitas com sugestão por
+    ingredientes disponíveis.
+
+    Este documento cobre os endpoints de **autenticação** (RF01, RF02) definidos
+    para a Semana 1. Os endpoints de despensa (RF03–RF05, RF11), sugestão
+    (RF06, RF07) e receitas (RF08–RF10) serão adicionados nas fases seguintes do
+    roadmap.
+
+    ## Autenticação
+
+    As rotas protegidas exigem o header `Authorization` com um token JWT no
+    formato `Bearer`:
+
+    ```http
+    Authorization: Bearer <jwt>
+    ```
+
+    O token é obtido em `POST /auth/login` e deve ser enviado em todas as
+    requisições a rotas protegidas. Requisições sem token, com token expirado ou
+    inválido recebem `401` com o código estável `nao_autenticado` ou
+    `token_invalido`.
+
+    ## Formato de erro
+
+    Todos os erros da API usam o mesmo envelope JSON:
+
+    ```json
+    {
+      "erro": "codigo_estavel",
+      "campos": [
+        { "campo": "email", "mensagem": "E-mail inválido." }
+      ]
+    }
+    ```
+
+    - `erro` é um **código estável em `snake_case`**, pensado para o cliente
+      comparar sem depender do texto da mensagem.
+    - `campos` lista os erros de validação por campo e vem **vazia** quando o
+      erro não é de validação (ex.: credenciais inválidas, token expirado).
+
+    Consulte a descrição de cada resposta para os códigos possíveis.
+
+    ## Segurança
+
+    - Senhas **nunca** trafegam de volta nas respostas e são armazenadas com
+      hash bcrypt (RNF02).
+    - Cada usuário só acessa os próprios dados (RNF03).
+  
   version: 1.0.0
+  contact:
+    name: Talhezim-Receitas-Rapidas
+    url: https://github.com/Talhezim-Receitas-Rapidas
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
 servers:
   - url: http://localhost:3000
-    description: Servidor de desenvolvimento local
+    description: Ambiente local de desenvolvimento
+  - url: https://api.talherzim.example.com
+    description: Produção (placeholder)
+
+tags:
+  - name: Autenticação
+    description: Cadastro, login, logout e sessão do usuário (RF01, RF02).
 
 paths:
   /auth/register:
     post:
-      summary: Cadastro de novo usuário
-      description: Cria uma nova conta de usuário com senha criptografada via bcrypt.
+      tags: [Autenticação]
+      operationId: registrarUsuario
+      summary: Cria uma conta de usuário
+      description: |
+        Cadastra um novo usuário com e-mail e senha (RF01). A senha é validada
+        e armazenada com hash bcrypt (RNF02). O e-mail deve ser único.
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CredenciaisRequest'
+              $ref: '#/components/schemas/RegistroRequest'
+            example:
+              email: usuario@exemplo.com
+              senha: senhaSegura123
       responses:
         '201':
-          description: Usuário cadastrado com sucesso.
+          description: Conta criada com sucesso.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioResponse'
+                $ref: '#/components/schemas/Usuario'
+              example:
+                id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                email: usuario@exemplo.com
         '409':
-          description: Conflito de e-mail duplicado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
-              example:
-                erro: email_duplicado
-                campos: []
+          $ref: '#/components/responses/EmailDuplicado'
         '422':
-          description: Dados de entrada inválidos.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
-              example:
-                erro: dados_invalidos
-                campos:
-                  - campo: email
-                    mensagem: E-mail inválido.
-                  - campo: senha
-                    mensagem: A senha deve ter ao menos 8 caracteres.
+          $ref: '#/components/responses/DadosInvalidos'
 
   /auth/login:
     post:
-      summary: Login de usuário
-      description: Autentica o usuário e gera um token JWT de sessão.
+      tags: [Autenticação]
+      operationId: autenticarUsuario
+      summary: Autentica o usuário e emite um token
+      description: |
+        Valida e-mail e senha e devolve um token JWT e os dados do usuário
+        (RF02). O token deve ser usado nas rotas protegidas no header
+        `Authorization: Bearer <jwt>`.
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CredenciaisRequest'
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: usuario@exemplo.com
+              senha: senhaSegura123
       responses:
         '200':
-          description: Login efetuado com sucesso.
+          description: Credenciais válidas; sessão iniciada.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
-        '401':
-          description: Credenciais incorretas ou usuário inexistente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
               example:
-                erro: credenciais_invalidas
-                campos: []
-        '422':
-          description: Dados de entrada inválidos.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                usuario:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  email: usuario@exemplo.com
+        '401':
+          $ref: '#/components/responses/CredenciaisInvalidas'
 
   /auth/logout:
     post:
-      summary: Logout do usuário
-      description: Encerra a sessão ativa invalidando o identificador do token JWT (jti).
+      tags: [Autenticação]
+      operationId: encerrarSessao
+      summary: Encerra a sessão do usuário
+      description: |
+        Encerra a sessão autenticada (RF02). Como o token JWT é *stateless*, o
+        cliente deve **descartar o token** localmente; o servidor invalida a
+        sessão quando houver lista de revogação.
       security:
-        - BearerAuth: []
+        - bearerAuth: []
       responses:
         '204':
-          description: Sessão finalizada com sucesso.
+          description: Sessão encerrada com sucesso. Sem corpo de resposta.
         '401':
-          description: Não autenticado ou token inválido.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
-              examples:
-                nao_autenticado:
-                  value:
-                    erro: nao_autenticado
-                    campos: []
-                token_invalido:
-                  value:
-                    erro: token_invalido
-                    campos: []
+          $ref: '#/components/responses/NaoAutenticado'
 
   /auth/me:
     get:
-      summary: Dados do usuário autenticado
-      description: Retorna os dados do titular do token JWT (RNF03).
+      tags: [Autenticação]
+      operationId: obterUsuarioAtual
+      summary: Retorna o usuário autenticado
+      description: |
+        Devolve os dados do usuário dono do token (RF02). Usado pelo front-end
+        para restaurar a sessão e proteger rotas.
       security:
-        - BearerAuth: []
+        - bearerAuth: []
       responses:
         '200':
-          description: Dados do usuário retornado com sucesso.
+          description: Usuário autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioResponse'
+                $ref: '#/components/schemas/Usuario'
+              example:
+                id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                email: usuario@exemplo.com
         '401':
-          description: Não autenticado ou token inválido.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErroResponse'
+          $ref: '#/components/responses/NaoAutenticado'
 
 components:
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: |
+        Token JWT obtido em `POST /auth/login`. Envie no header:
+        `Authorization: Bearer <jwt>`.
 
   schemas:
-    CredenciaisRequest:
+    Usuario:
       type: object
-      required:
-        - email
-        - senha
+      description: Representação pública do usuário. Nunca inclui a senha.
+      required: [id, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único do usuário.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        email:
+          type: string
+          format: email
+          description: E-mail cadastrado (único).
+          example: usuario@exemplo.com
+
+    RegistroRequest:
+      type: object
+      required: [email, senha]
       properties:
         email:
           type: string
@@ -146,47 +214,121 @@ components:
           example: usuario@exemplo.com
         senha:
           type: string
+          format: password
           minLength: 8
+          description: |
+            Mínimo de 8 caracteres. Armazenada com hash bcrypt (RNF02), nunca em
+            texto puro.
           example: senhaSegura123
 
-    UsuarioResponse:
+    LoginRequest:
       type: object
+      required: [email, senha]
       properties:
-        id:
-          type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
         email:
           type: string
           format: email
           example: usuario@exemplo.com
+        senha:
+          type: string
+          format: password
+          example: senhaSegura123
 
     LoginResponse:
       type: object
+      required: [token, usuario]
       properties:
         token:
           type: string
+          description: "JWT para uso no header `Authorization: Bearer <token>`."
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         usuario:
-          $ref: '#/components/schemas/UsuarioResponse'
+          $ref: '#/components/schemas/Usuario'
 
-    ErroCampo:
+    Erro:
       type: object
-      properties:
-        campo:
-          type: string
-          example: email
-        mensagem:
-          type: string
-          example: E-mail inválido.
-
-    ErroResponse:
-      type: object
+      description: Envelope padrão de erro da API.
+      required: [erro]
       properties:
         erro:
           type: string
+          description: Código estável do erro (snake_case).
+          enum:
+            - dados_invalidos
+            - email_duplicado
+            - credenciais_invalidas
+            - nao_autenticado
+            - token_invalido
           example: dados_invalidos
         campos:
           type: array
+          description: |
+            Erros de validação por campo. Vazio quando o erro não é de
+            validação.
           items:
-            $ref: '#/components/schemas/ErroCampo'
+            $ref: '#/components/schemas/CampoErro'
+          example:
+            - campo: email
+              mensagem: E-mail inválido.
+
+    CampoErro:
+      type: object
+      required: [campo, mensagem]
+      properties:
+        campo:
+          type: string
+          description: Nome do campo com problema.
+          example: email
+        mensagem:
+          type: string
+          description: Descrição legível do problema.
+          example: E-mail inválido.
+
+  responses:
+    DadosInvalidos:
+      description: |
+        Payload inválido (campos ausentes, e-mail malformado ou senha curta).
+        Código `dados_invalidos`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            erro: dados_invalidos
+            campos:
+              - campo: email
+                mensagem: E-mail inválido.
+              - campo: senha
+                mensagem: A senha deve ter ao menos 8 caracteres.
+
+    EmailDuplicado:
+      description: Já existe uma conta com o e-mail informado. Código `email_duplicado`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            erro: email_duplicado
+            campos: []
+
+    CredenciaisInvalidas:
+      description: E-mail ou senha incorretos. Código `credenciais_invalidas`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            erro: credenciais_invalidas
+            campos: []
+
+    NaoAutenticado:
+      description: |
+        Requisição sem token, com token expirado ou inválido. Código
+        `nao_autenticado` ou `token_invalido`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            erro: nao_autenticado
+            campos: []
