@@ -38,24 +38,54 @@ echo "OK: conexão com usuário '$DB_USER' e database '$DB_NAME' funcionou"
 echo "==> Verificando tabelas criadas pelo schema.sql"
 TABLES=$(docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
   psql -U "$DB_USER" -d "$DB_NAME" -tAc \
-  "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';")
+  "SELECT count(*) FROM information_schema.tables
+   WHERE table_type='BASE TABLE'
+     AND table_schema NOT IN ('pg_catalog','information_schema');")
 
 if [ "$TABLES" -lt 1 ]; then
-  echo "ERRO: nenhuma tabela encontrada em public"
+  echo "ERRO: nenhuma tabela de usuário encontrada em '$DB_NAME'"
+  echo "--- Databases ---"
+  docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+    psql -U "$DB_USER" -d "$DB_NAME" -c "\l"
+  echo "--- Schemas ---"
+  docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+    psql -U "$DB_USER" -d "$DB_NAME" -c "\dn"
+  echo "--- Logs do init ---"
+  docker compose -f "$COMPOSE_FILE" logs "$SERVICE" | tail -50
   exit 1
 fi
-echo "OK: $TABLES tabela(s) encontrada(s) em public"
+echo "OK: $TABLES tabela(s) encontrada(s)"
 
 echo "==> Validando role do banco"
 docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
   psql -U "$DB_USER" -d "$DB_NAME" -c "\du" | grep -q "$DB_USER"
 echo "OK: role '$DB_USER' existe"
 
+echo "==> Debug: databases existentes"
+docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+  psql -U "$DB_USER" -d "$DB_NAME" -c "\l"
+
+echo "==> Debug: schemas existentes"
+docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+  psql -U "$DB_USER" -d "$DB_NAME" -c "\dn"
+
+echo "==> Debug: todas as tabelas (qualquer schema)"
+docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+  psql -U "$DB_USER" -d "$DB_NAME" -c "\dt *.*"
+
+echo "==> Debug: conteúdo do initdb.d"
+docker compose -f "$COMPOSE_FILE" exec -T "$SERVICE" \
+  ls -la /docker-entrypoint-initdb.d/
+
+echo "==> Debug: log do postgres procurando por 'running'"
+docker compose -f "$COMPOSE_FILE" logs "$SERVICE" | grep -i "running\|initdb\|schema\|CREATE"
+
 echo "==> Verificando logs por erros fatais"
 if docker compose -f "$COMPOSE_FILE" logs "$SERVICE" 2>&1 | grep -E "FATAL|PANIC"; then
   echo "ERRO: encontrados erros fatais no log do Postgres"
   exit 1
 fi
+
 echo "OK: nenhum erro fatal no log"
 
 echo ""
