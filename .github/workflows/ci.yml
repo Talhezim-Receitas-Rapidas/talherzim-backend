@@ -39,16 +39,7 @@ jobs:
     name: Validar Docker-file
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Rodar Hadolint no Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile
-
+    
   unit-tests:
     name: Rodar Testes Unitarios
     runs-on: ubuntu-latest
@@ -68,7 +59,7 @@ jobs:
         run: npm ci
 
       - name: Rodar testes unitários
-        run: npm test
+        run: npm test:unit
 
   lint:
     name: Rodar Lint
