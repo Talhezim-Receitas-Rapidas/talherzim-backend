@@ -22,6 +22,15 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
       - name: Verificar versão do Docker Compose
         run: docker compose version
 
@@ -30,6 +39,12 @@ jobs:
 
       - name: Rodar validação
         run: ./scripts/validate-compose.sh
+
+      - name: Rodar lint
+        run: npm run lint
+
+      - name: Rodar testes unitários
+        run: npm run test:unit
 
       - name: Mostrar logs em caso de falha
         if: failure()
