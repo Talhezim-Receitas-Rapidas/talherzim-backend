@@ -10,7 +10,7 @@ async function main() {
   await migrate(pool);
 
   const authService = new AuthService(pool, config, new Set());
-  const app = createApp({ authService, jwtSecret: config.jwtSecret, pool });
+  const app = createApp({ authService, jwtSecret: config.jwtSecret });
 
   app.listen(config.port, () => {
     console.log(`Talherzim API em http://localhost:${config.port}`);

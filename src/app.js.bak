@@ -3,19 +3,12 @@ const { criarAuthRouter } = require('./routes/auth');
 const { criarAuthenticate } = require('./middleware/authenticate');
 const { enviarErro } = require('./http/erro');
 
-function createApp({ authService, jwtSecret, pool }) {
+function createApp({ authService, jwtSecret }) {
   const app = express();
   const authenticate = criarAuthenticate(authService, jwtSecret);
 
   app.use(express.json());
   app.use('/auth', criarAuthRouter(authService, authenticate));
-
-  // Receitas routes
-  const { ReceitaService } = require('./services/receitaService');
-  const receitaService = new ReceitaService(pool);
-  const { criarReceitasRouter } = require('./routes/receitas');
-  const receitasRouter = criarReceitasRouter(receitaService);
-  app.use('/receitas', receitasRouter);
 
   app.use((err, _req, res, _next) => {
     console.error(err);
