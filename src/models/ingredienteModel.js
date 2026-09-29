@@ -1,32 +1,49 @@
-const { normalizarNomeIngrediente } = require('../utils/normalizacao');
-
 class IngredienteModel {
-  /**
-   * Busca todos os ingredientes de um usuário.
-   * @param {import('pg').Pool} pool
-   * @param {string} usuarioId
-   * @returns {Promise<Array>} Array of objects with { id, nome, quantidade, unidade }
-   */
-  static async buscarPorUsuario(pool, usuarioId) {
+  static async criar(pool, usuarioId, nome, quantidade, unidade) {
     const { rows } = await pool.query(
-      'SELECT id, nome, quantidade, unidade FROM ingredientes WHERE usuario_id = $1',
-      [usuarioId]
+      `INSERT INTO ingredientes (usuario_id, nome, quantidade, unidade)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em`,
+      [usuarioId, nome, quantidade, unidade],
+    );
+    return rows[0];
+  }
+
+  static async listarPorUsuario(pool, usuarioId) {
+    const { rows } = await pool.query(
+      `SELECT id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em
+       FROM ingredientes
+       WHERE usuario_id = $1
+       ORDER BY nome`,
+      [usuarioId],
     );
     return rows;
   }
 
-  /**
-   * Busca os nomes normalizados dos ingredientes de um usuário (para matching).
-   * @param {import('pg').Pool} pool
-   * @param {string} usuarioId
-   * @returns {Promise<string[]>} Array of normalized ingredient names
-   */
-  static async buscarNomesNormalizadosPorUsuario(pool, usuarioId) {
+  static async buscarPorId(pool, id) {
     const { rows } = await pool.query(
-      'SELECT lower(nome) AS nome_normalizado FROM ingredientes WHERE usuario_id = $1',
-      [usuarioId]
+      `SELECT id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em
+       FROM ingredientes
+       WHERE id = $1`,
+      [id],
     );
-    return rows.map(r => r.nome_normalizado);
+    return rows[0] || null;
+  }
+
+  static async atualizar(pool, id, nome, quantidade, unidade) {
+    const { rows } = await pool.query(
+      `UPDATE ingredientes
+       SET nome = $2, quantidade = $3, unidade = $4, atualizado_em = now()
+       WHERE id = $1
+       RETURNING id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em`,
+      [id, nome, quantidade, unidade],
+    );
+    return rows[0] || null;
+  }
+
+  static async remover(pool, id) {
+    const { rowCount } = await pool.query('DELETE FROM ingredientes WHERE id = $1', [id]);
+    return rowCount > 0;
   }
 }
 
