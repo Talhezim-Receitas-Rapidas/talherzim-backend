@@ -1,14 +1,16 @@
 const express = require('express');
 const { criarAuthRouter } = require('./routes/auth');
+const { criarIngredientesRouter } = require('./routes/ingredientes');
 const { criarAuthenticate } = require('./middleware/authenticate');
 const { enviarErro } = require('./http/erro');
 
-function createApp({ authService, jwtSecret }) {
+function createApp({ authService, despensaService, jwtSecret }) {
   const app = express();
   const authenticate = criarAuthenticate(authService, jwtSecret);
 
   app.use(express.json());
   app.use('/auth', criarAuthRouter(authService, authenticate));
+  app.use('/ingredientes', criarIngredientesRouter(despensaService, authenticate));
 
   app.use((err, _req, res, _next) => {
     console.error(err);

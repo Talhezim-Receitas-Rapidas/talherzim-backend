@@ -51,11 +51,11 @@ describe('S1-04 autenticação', () => {
     await pool.query('DELETE FROM usuarios');
   });
 
-  async function cadastrar(email = 'usuario@exemplo.com', senha = 'senhaSegura123') {
+  function cadastrar(email = 'usuario@exemplo.com', senha = 'senhaSegura123') {
     return request(app).post('/auth/register').send({ email, senha });
   }
 
-  async function entrar(email = 'usuario@exemplo.com', senha = 'senhaSegura123') {
+  function entrar(email = 'usuario@exemplo.com', senha = 'senhaSegura123') {
     return request(app).post('/auth/login').send({ email, senha });
   }
 
