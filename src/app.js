@@ -4,7 +4,7 @@ const { criarIngredientesRouter } = require('./routes/ingredientes');
 const { criarAuthenticate } = require('./middleware/authenticate');
 const { enviarErro } = require('./http/erro');
 
-function createApp({ authService, despensaService, jwtSecret }) {
+function createApp({ authService, despensaService, jwtSecret, pool }) {
   const app = express();
   const authenticate = criarAuthenticate(authService, jwtSecret);
 
@@ -19,7 +19,7 @@ function createApp({ authService, despensaService, jwtSecret }) {
   const receitasRouter = criarReceitasRouter(receitaService);
   app.use('/receitas', receitasRouter);
 
-  app.use((err, _req, res, _next) => {
+  app.use((err, _req, res) => {
     console.error(err);
     return enviarErro(res, 500, 'erro_interno');
   });
