@@ -56,23 +56,20 @@ class ReceitaService {
     // Construir placeholders para os ingredientes do usuário: $1, $2, ...
     const placeholders = usuarioIngredientesArray.map((_, idx) => `$${idx + 1}`).join(', ');
 
+    const correspondencias =
+      `COUNT(CASE WHEN lower(ri.nome_ingrediente) = ANY(ARRAY[${placeholders}]) THEN 1 END)`;
+
     const query = `
       SELECT r.id, r.nome, r.modo_preparo, r.imagem_url, r.fonte, r.fonte_id, r.criado_em,
-             COALESCE(array_agg(ri.nome_ingrediente ORDER BY ri.nome_ingrediente), '{}') AS ingredientes,
-             COUNT(CASE WHEN lower(ri.nome_ingrediente) = ANY(ARRAY[${placeholders}]) THEN 1 END) AS correspondencias_count
+             COALESCE(array_agg(ri.nome_ingrediente ORDER BY ri.nome_ingrediente), '{}') AS ingredientes
       FROM receitas r
       LEFT JOIN receita_ingredientes ri ON ri.receita_id = r.id
       GROUP BY r.id
-      ORDER BY correspondencias_count DESC, r.nome ASC
+      ORDER BY ${correspondencias} DESC, r.nome ASC
     `;
 
     const { rows } = await this.pool.query(query, usuarioIngredientesArray);
-
-    // Remover o campo correspondencias_count do retorno
-    return rows.map(row => {
-      const { correspondencias_count, ...receita } = row;
-      return receita;
-    });
+    return rows;
   }
   async buscarPorId(id) {
     try {

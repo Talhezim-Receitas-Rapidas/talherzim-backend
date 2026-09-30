@@ -1,3 +1,5 @@
+const { normalizarNomeIngrediente } = require('../utils/normalizacao');
+
 class IngredienteModel {
   static async criar(pool, usuarioId, nome, quantidade, unidade) {
     const { rows } = await pool.query(
@@ -44,6 +46,11 @@ class IngredienteModel {
   static async remover(pool, id) {
     const { rowCount } = await pool.query('DELETE FROM ingredientes WHERE id = $1', [id]);
     return rowCount > 0;
+  }
+
+  static async buscarNomesNormalizadosPorUsuario(pool, usuarioId) {
+    const rows = await IngredienteModel.listarPorUsuario(pool, usuarioId);
+    return [...new Set(rows.map((row) => normalizarNomeIngrediente(row.nome)).filter(Boolean))];
   }
 }
 
