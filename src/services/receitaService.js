@@ -1,7 +1,18 @@
 const { ReceitaModel } = require('../models/receitaModel');
 const { IngredienteModel } = require('../models/ingredienteModel');
 const { StaticDatasetProvider } = require('../providers/staticDatasetProvider');
-const { enviarErro } = require('../http/erro');
+
+// RNF01: resposta em até 3 s. O banco tem 2 s; depois disso o dataset
+// estático responde (RNF07).
+const TEMPO_LIMITE_BANCO_MS = 2000;
+
+function comTimeout(promessa, ms) {
+  let timer;
+  const limite = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Banco excedeu ${ms} ms`)), ms);
+  });
+  return Promise.race([promessa, limite]).finally(() => clearTimeout(timer));
+}
 
 class ReceitaService {
   /**
@@ -14,50 +25,41 @@ class ReceitaService {
 
   /**
    * Busca receitas sugeridas com base na despensa do usuário.
+   * Se o banco falhar ou demorar mais que o limite, usa o dataset estático.
    * @param {string} usuarioId
    * @returns {Promise<Array>}
    */
   async listarSugeridas(usuarioId) {
-    // 1. Obter os ingredientes do usuário (normalizados)
-    let usuarioIngredientes;
-    try {
-      usuarioIngredientes = await IngredienteModel.buscarNomesNormalizadosPorUsuario(this.pool, usuarioId);
-    } catch (err) {
-      console.error('Erro ao buscar ingredientes do usuário:', err);
-      throw enviarErro(null, 500, 'erro_interno'); // ou talvez um erro específico
-    }
+    let ingredientes = [];
+    const consultarBanco = async () => {
+      ingredientes = await IngredienteModel.buscarNomesNormalizadosPorUsuario(
+        this.pool,
+        usuarioId,
+      );
+      return this._listarSugeridasDoBanco(ingredientes);
+    };
 
-    // 2. Tentar obter do banco de dados
     try {
-      return await this._listarSugeridasDoBanco(usuarioIngredientes);
-    } catch (dbErr) {
-      console.warn('Falha ao buscar receitas sugeridas no banco, usando fallback estático:', dbErr);
-      // 3. Fallback para dataset estático
-      return await this.staticProvider.buscarReceitas(usuarioIngredientes);
+      return await comTimeout(consultarBanco(), TEMPO_LIMITE_BANCO_MS);
+    } catch (err) {
+      console.warn('Falha ao buscar receitas sugeridas no banco, usando fallback estático:', err);
+      return this.staticProvider.buscarReceitas(ingredientes);
     }
   }
 
   /**
    * Busca receitas sugeridas no banco de dados.
-   * @param {string[]} usuarioIngredientesArray - Array de nomes normalizados de ingredientes do usuário
-   * @returns {Promise<Array>}
-   */
-  /**
-   * Busca receitas sugeridas no banco de dados.
-   * @param {string[]} usuarioIngredientesArray - Array de nomes normalizados de ingredientes do usuário
+   * @param {string[]} usuarioIngredientesArray - nomes normalizados da despensa
    * @returns {Promise<Array>}
    */
   async _listarSugeridasDoBanco(usuarioIngredientesArray) {
     if (!Array.isArray(usuarioIngredientesArray) || usuarioIngredientesArray.length === 0) {
-      // Se não houver ingredientes, retorna vazio (nenhuma sugestão)
       return [];
     }
 
-    // Construir placeholders para os ingredientes do usuário: $1, $2, ...
     const placeholders = usuarioIngredientesArray.map((_, idx) => `$${idx + 1}`).join(', ');
 
-    const correspondencias =
-      `COUNT(CASE WHEN lower(ri.nome_ingrediente) = ANY(ARRAY[${placeholders}]) THEN 1 END)`;
+    const correspondencias = `COUNT(CASE WHEN lower(ri.nome_ingrediente) = ANY(ARRAY[${placeholders}]) THEN 1 END)`;
 
     const query = `
       SELECT r.id, r.nome, r.modo_preparo, r.imagem_url, r.fonte, r.fonte_id, r.criado_em,
@@ -71,9 +73,18 @@ class ReceitaService {
     const { rows } = await this.pool.query(query, usuarioIngredientesArray);
     return rows;
   }
+
+  /**
+   * Detalhe da receita (com ingredientes e modo_preparo). Fallback estático.
+   * @param {string} id
+   * @returns {Promise<Object|null>}
+   */
   async buscarPorId(id) {
     try {
-      const receita = await ReceitaModel.buscarPorId(this.pool, id);
+      const receita = await comTimeout(
+        ReceitaModel.buscarPorId(this.pool, id),
+        TEMPO_LIMITE_BANCO_MS,
+      );
       if (receita) {
         return receita;
       }
@@ -81,9 +92,8 @@ class ReceitaService {
       console.warn(`Falha ao buscar receita ${id} no banco, usando fallback estático:`, dbErr);
     }
 
-    // Fallback para dataset estático
     const todasReceitas = await this.staticProvider.obterTodasReceitas();
-    return todasReceitas.find(r => r.id === id) || null;
+    return todasReceitas.find((r) => String(r.id) === String(id)) || null;
   }
 }
 
