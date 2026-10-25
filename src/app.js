@@ -24,11 +24,14 @@ function createApp({ authService, despensaService, jwtSecret, pool, corsOrigins 
   const { ReceitaService } = require('./services/receitaService');
   const receitaService = new ReceitaService(pool);
   const { criarReceitasRouter } = require('./routes/receitas');
-  const receitasRouter = criarReceitasRouter(receitaService);
+  const receitasRouter = criarReceitasRouter(receitaService, authenticate);
   app.use('/receitas', receitasRouter);
 
-  app.use((err, _req, res) => {
+  app.use((err, _req, res, next) => {
     console.error(err);
+    if (res.headersSent) {
+      return next(err);
+    }
     return enviarErro(res, 500, 'erro_interno');
   });
 

@@ -54,6 +54,39 @@ describe('ReceitaService (fallback e limite de tempo)', () => {
     await expect(promessa).resolves.toEqual([{ id: 1, nome: 'Omelete' }]);
   });
 
+  test('retorna lista vazia quando a despensa não tem ingredientes', async () => {
+    IngredienteModel.buscarNomesNormalizadosPorUsuario.mockResolvedValue([]);
+
+    const resultado = await servico.listarSugeridas('u1');
+
+    expect(resultado).toEqual([]);
+    expect(pool.query).not.toHaveBeenCalled();
+    expect(servico.staticProvider.buscarReceitas).not.toHaveBeenCalled();
+  });
+
+  test('usa o dataset estático quando o banco não possui receitas', async () => {
+    IngredienteModel.buscarNomesNormalizadosPorUsuario.mockResolvedValue(['ovo']);
+    pool.query.mockResolvedValue({ rows: [] });
+
+    const resultado = await servico.listarSugeridas('u1');
+
+    expect(resultado).toEqual([{ id: 1, nome: 'Omelete' }]);
+    expect(servico.staticProvider.buscarReceitas).toHaveBeenCalledWith(['ovo']);
+  });
+
+  test('ranqueia no banco apenas receitas com ao menos uma correspondência', async () => {
+    IngredienteModel.buscarNomesNormalizadosPorUsuario.mockResolvedValue(['ovo']);
+    pool.query.mockResolvedValue({
+      rows: [{ id: 'r1', nome: 'Omelete', correspondencias: 1, total_ingredientes: 1 }],
+    });
+
+    const resultado = await servico.listarSugeridas('u1');
+
+    expect(resultado).toHaveLength(1);
+    expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('HAVING'), ['ovo']);
+    expect(pool.query.mock.calls[0][0]).toContain('total_ingredientes');
+  });
+
   test('buscarPorId encontra no dataset estático mesmo com id em texto', async () => {
     ReceitaModel.buscarPorId.mockRejectedValue(new Error('banco fora'));
 

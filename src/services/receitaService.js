@@ -36,7 +36,17 @@ class ReceitaService {
         this.pool,
         usuarioId,
       );
-      return this._listarSugeridasDoBanco(ingredientes);
+
+      if (ingredientes.length === 0) {
+        return [];
+      }
+
+      const receitas = await this._listarSugeridasDoBanco(ingredientes);
+      if (receitas.length === 0) {
+        return this.staticProvider.buscarReceitas(ingredientes);
+      }
+
+      return receitas;
     };
 
     try {
@@ -63,11 +73,18 @@ class ReceitaService {
 
     const query = `
       SELECT r.id, r.nome, r.modo_preparo, r.imagem_url, r.fonte, r.fonte_id, r.criado_em,
-             COALESCE(array_agg(ri.nome_ingrediente ORDER BY ri.nome_ingrediente), '{}') AS ingredientes
+             COUNT(ri.id)::int AS total_ingredientes,
+             ${correspondencias}::int AS correspondencias,
+             COALESCE(
+               array_agg(ri.nome_ingrediente ORDER BY ri.nome_ingrediente)
+                 FILTER (WHERE ri.nome_ingrediente IS NOT NULL),
+               '{}'
+             ) AS ingredientes
       FROM receitas r
       LEFT JOIN receita_ingredientes ri ON ri.receita_id = r.id
       GROUP BY r.id
-      ORDER BY ${correspondencias} DESC, r.nome ASC
+      HAVING ${correspondencias} > 0
+      ORDER BY correspondencias DESC, r.nome ASC
     `;
 
     const { rows } = await this.pool.query(query, usuarioIngredientesArray);
@@ -93,7 +110,11 @@ class ReceitaService {
     }
 
     const todasReceitas = await this.staticProvider.obterTodasReceitas();
-    return todasReceitas.find((r) => String(r.id) === String(id)) || null;
+    return (
+      todasReceitas.find(
+        (r) => String(r.id) === String(id) || String(r.fonte_id) === String(id),
+      ) || null
+    );
   }
 }
 
