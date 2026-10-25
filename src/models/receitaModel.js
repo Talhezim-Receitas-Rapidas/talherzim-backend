@@ -11,7 +11,7 @@ class ReceitaModel {
     const { rows } = await client.query(
       `INSERT INTO receitas (nome, modo_preparo, imagem_url, fonte, fonte_id)
        VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (fonte, fonte_id)
+       ON CONFLICT (fonte, fonte_id) WHERE fonte_id IS NOT NULL
        DO UPDATE SET
          nome = EXCLUDED.nome,
          modo_preparo = EXCLUDED.modo_preparo,
