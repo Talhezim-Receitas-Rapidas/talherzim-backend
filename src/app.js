@@ -1,13 +1,21 @@
 const express = require('express');
+const cors = require('cors');
 const { criarAuthRouter } = require('./routes/auth');
 const { criarIngredientesRouter } = require('./routes/ingredientes');
 const { criarAuthenticate } = require('./middleware/authenticate');
 const { enviarErro } = require('./http/erro');
 
-function createApp({ authService, despensaService, jwtSecret, pool }) {
+function createApp({ authService, despensaService, jwtSecret, pool, corsOrigins }) {
   const app = express();
   const authenticate = criarAuthenticate(authService, jwtSecret);
 
+  app.use(
+    cors({
+      origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    }),
+  );
   app.use(express.json());
   app.use('/auth', criarAuthRouter(authService, authenticate));
   app.use('/ingredientes', criarIngredientesRouter(despensaService, authenticate));

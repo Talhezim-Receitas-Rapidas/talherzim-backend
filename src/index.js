@@ -12,7 +12,13 @@ async function main() {
 
   const authService = new AuthService(pool, config, new Set());
   const despensaService = new DespensaService(pool);
-  const app = createApp({ authService, despensaService, jwtSecret: config.jwtSecret });
+  const app = createApp({
+    authService,
+    despensaService,
+    jwtSecret: config.jwtSecret,
+    pool,
+    corsOrigins: config.corsOrigins,
+  });
 
   app.listen(config.port, () => {
     console.log(`Talherzim API em http://localhost:${config.port}`);

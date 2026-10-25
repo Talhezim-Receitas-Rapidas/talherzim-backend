@@ -13,6 +13,14 @@ function databaseUrl() {
   return `postgres://${user}:${password}@${host}:${port}/${name}`;
 }
 
+function corsOrigins() {
+  const raw = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  return raw
+    .split(',')
+    .map((origem) => origem.trim())
+    .filter(Boolean);
+}
+
 function loadConfig() {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
@@ -25,6 +33,7 @@ function loadConfig() {
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
     bcryptRounds: Number(process.env.BCRYPT_ROUNDS) || 10,
     databaseUrl: databaseUrl(),
+    corsOrigins: corsOrigins(),
   };
 }
 
