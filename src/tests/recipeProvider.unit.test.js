@@ -100,6 +100,8 @@ describe('S1-07 — Dataset de receitas e provider', () => {
       expect(todas.length).toBe(3);
       expect(todas[0].nome).toBe('Omelete');
       expect(todas[0].fonte).toBe('estatico');
+      expect(todas[0].id).toBe('mock-1');
+      expect(todas[0].total_ingredientes).toBe(3);
     });
 
     it('buscarReceitas sem ingredientes deve retornar todas', async () => {
@@ -152,7 +154,7 @@ describe('S1-07 — Dataset de receitas e provider', () => {
       const res = await ReceitaModel.upsert(mockClient, receita);
       expect(res).toEqual({ id: 'uuid-rec-1', nome: 'Bolo' });
       expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining('ON CONFLICT (fonte, fonte_id)'),
+        expect.stringContaining('ON CONFLICT (fonte, fonte_id) WHERE fonte_id IS NOT NULL'),
         expect.arrayContaining(['Bolo', 'estatico', 'estatico-001']),
       );
     });

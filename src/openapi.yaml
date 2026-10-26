@@ -177,6 +177,68 @@ paths:
         '401':
           $ref: '#/components/responses/NaoAutenticado'
 
+  /receitas/sugeridas:
+    get:
+      tags: [Receitas]
+      operationId: listarReceitasSugeridas
+      summary: Lista receitas sugeridas com base na despensa do usuário
+      description: Retorna receitas ranqueadas pela quantidade de ingredientes em comum com a despensa do usuário.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de receitas sugeridas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Receita'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '500':
+          description: Erro interno.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /receitas/{id}:
+    get:
+      tags: [Receitas]
+      operationId: obterReceitaPorId
+      summary: Obtém detalhe de uma receita pelo ID
+      description: Retorna os detalhes de uma receita, incluindo seus ingredientes e modo de preparo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalhe da receita.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receita'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '404':
+          description: Receita não encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '500':
+          description: Erro interno.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
 components:
   securitySchemes:
     bearerAuth:

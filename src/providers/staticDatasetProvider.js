@@ -51,12 +51,14 @@ class StaticDatasetProvider extends RecipeProvider {
       ];
 
       return {
+        id: item.id || item.fonte_id || `estatico-${String(index + 1).padStart(3, '0')}`,
         fonte_id: item.fonte_id || `estatico-${String(index + 1).padStart(3, '0')}`,
         nome: item.nome.trim(),
         modo_preparo: item.modo_preparo.trim(),
         imagem_url: item.imagem_url || null,
         fonte: item.fonte || 'estatico',
         ingredientes: ingredientesNormalizados,
+        total_ingredientes: ingredientesNormalizados.length,
       };
     });
 
