@@ -97,7 +97,8 @@ class StaticDatasetProvider extends RecipeProvider {
         return {
           ...receita,
           correspondenciasCount: correspondencias.length,
-          correspondencias,
+          correspondencias: correspondencias.length,
+          ingredientes_correspondentes: correspondencias,
         };
       })
       .filter((r) => r.correspondenciasCount > 0)

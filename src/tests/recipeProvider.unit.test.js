@@ -118,6 +118,8 @@ describe('S1-07 — Dataset de receitas e provider', () => {
       expect(resultado.length).toBe(2);
       expect(resultado[0].nome).toBe('Omelete');
       expect(resultado[0].correspondenciasCount).toBe(2);
+      expect(resultado[0].correspondencias).toBe(2);
+      expect(resultado[0].ingredientes_correspondentes).toEqual(['ovo', 'queijo']);
       expect(resultado[1].nome).toBe('Arroz com Ovo');
       expect(resultado[1].correspondenciasCount).toBe(1);
     });
