@@ -241,9 +241,13 @@ paths:
   /receitas/sugeridas:
     get:
       summary: Lista sugestões da despensa ou pesquisa receitas por termo
-      description: Sem resultado local, consulta o ingrediente na fonte externa. Falhas e ausência de resultados são informadas em avisos com HTTP 200.
+      description: Sem detalhes, preserva a resposta em array. Com detalhes=true, inclui busca externa, pesquisa por termo e avisos com HTTP 200.
       security: [{ bearerAuth: [] }]
       parameters:
+        - name: detalhes
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
         - name: busca
           in: query
           required: false
@@ -255,16 +259,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [receitas, avisos, despensaVazia]
-                properties:
-                  receitas:
-                    type: array
+                oneOf:
+                  - type: array
                     items: { $ref: '#/components/schemas/Receita' }
-                  avisos:
-                    type: array
-                    items: { type: string }
-                  despensaVazia: { type: boolean }
+                  - type: object
+                    required: [receitas, avisos, despensaVazia]
+                    properties:
+                      receitas:
+                        type: array
+                        items: { $ref: '#/components/schemas/Receita' }
+                      avisos:
+                        type: array
+                        items: { type: string }
+                      despensaVazia: { type: boolean }
         '401': { $ref: '#/components/responses/NaoAutenticado' }
         '422':
           description: Busca inválida ou acima de 150 caracteres
@@ -310,11 +317,11 @@ components:
   schemas:
     IngredientePayload:
       type: object
-      required: [nome, quantidade, unidade]
+      required: [nome]
       properties:
         nome: { type: string, minLength: 1, maxLength: 150 }
-        quantidade: { type: number, minimum: 0.01, maximum: 99999999.99 }
-        unidade: { type: string, enum: [un, g, kg, ml, l] }
+        quantidade: { type: number, minimum: 0, maximum: 99999999.99, nullable: true, description: Quantidade opcional. Valores positivos devem ser de pelo menos 0.01. }
+        unidade: { type: string, maxLength: 20, nullable: true }
 
     Ingrediente:
       allOf:
@@ -323,10 +330,11 @@ components:
           required: [id]
           properties:
             id: { type: string, format: uuid }
+            usuario_id: { type: string, format: uuid }
 
     Receita:
       type: object
-      required: [id, nome, ingredientes, externa]
+      required: [id, nome, ingredientes]
       properties:
         id: { type: string }
         nome: { type: string }

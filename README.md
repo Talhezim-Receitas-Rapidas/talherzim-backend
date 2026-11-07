@@ -31,6 +31,7 @@ Copie `.env.example` para `.env` e preencha:
 | `BCRYPT_ROUNDS` | Custo do hash de senha |
 | `DATABASE_URL` | Connection string do Postgres. Se ausente, usa `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_PORT` |
 | `FRONTEND_ORIGIN` | Origem permitida pelo CORS, com padrão `http://localhost:5173` |
+| `CORS_ORIGIN` | Lista de origens separadas por vírgula. Tem prioridade sobre `FRONTEND_ORIGIN` |
 | `THEMEALDB_API_KEY` | Chave da TheMealDB. Padrão `1` para desenvolvimento e uso educacional |
 
 Depois, aplique o schema no banco:
@@ -56,7 +57,7 @@ npm run migrate
 
 Header: `Authorization: Bearer <jwt>`
 
-A sugestão retorna `{ receitas, avisos, despensaVazia }`. `busca` é opcional. IDs externos usam o prefixo `externa-`. O contrato formal está em `src/openapi.yaml` e o fluxo da consulta externa está detalhado na documentação indicada acima.
+A sugestão com `detalhes=true` retorna `{ receitas, avisos, despensaVazia }` e aceita o parâmetro opcional `busca`. Sem essa opção, mantém o array do contrato anterior. IDs externos usam o prefixo `externa-`. O contrato formal está em `src/openapi.yaml` e o fluxo da consulta externa está detalhado na documentação indicada acima.
 
 Ao iniciar, o servidor cria também `traducoes_receitas` de forma idempotente. Em uma instalação existente, reinicie o backend ou execute `npm run migrate`. Não há dependências npm adicionais para a integração. As consultas externas usam `fetch` e `AbortSignal.timeout` do Node.js. Use Node.js 22 ou superior.
 

@@ -149,10 +149,10 @@ test('rotas normais exigem login e retornam sugestões locais para a despensa do
     jwtSecret: 'teste',
     authService: { tokenRevogado: () => false, buscarPorId: async () => ({ id: 'usuario-1' }) },
   });
-  await request(app).get('/receitas/sugeridas').expect(401);
+  await request(app).get('/receitas/sugeridas?detalhes=true').expect(401);
   const token = jwt.sign({ sub: 'usuario-1', jti: 'teste' }, 'teste');
   const { body } = await request(app)
-    .get('/receitas/sugeridas')
+    .get('/receitas/sugeridas?detalhes=true')
     .set('Authorization', `Bearer ${token}`)
     .expect(200);
   expect(body.receitas.length).toBeGreaterThan(0);

@@ -1,5 +1,5 @@
 const { ReceitaModel } = require('../models/receitaModel');
-const { StaticDatasetProvider } = require('../providers/staticDatasetProvider');
+const { ReceitaService, comTimeout } = require('./receitaService');
 const { TheMealDBProvider, normalizar, nomes } = require('../providers/theMealDBProvider');
 const { TranslationService } = require('./translationService');
 
@@ -9,16 +9,21 @@ function compativel(a, b) {
   return primeiro === segundo || (nomes[primeiro] || primeiro) === (nomes[segundo] || segundo);
 }
 
-class RecipeSuggestionService {
+class RecipeSuggestionService extends ReceitaService {
   constructor(pool, externo = new TheMealDBProvider()) {
-    this.pool = pool;
+    super(pool);
     this.externo = externo;
-    this.estatico = new StaticDatasetProvider();
+    this.estatico = this.staticProvider;
     this.tradutor = new TranslationService(pool);
   }
 
   async locais() {
-    const banco = await ReceitaModel.listarTodas(this.pool);
+    let banco;
+    try {
+      banco = await comTimeout(ReceitaModel.listarTodas(this.pool), 2000);
+    } catch {
+      banco = [];
+    }
     const estaticas = await this.estatico.obterTodasReceitas();
     const chaves = new Set(banco.map((r) => `${r.fonte}:${r.fonte_id}`));
     return [...banco, ...estaticas.filter((r) => !chaves.has(`${r.fonte}:${r.fonte_id}`))].map(
@@ -27,9 +32,11 @@ class RecipeSuggestionService {
   }
 
   async sugerir(usuarioId, busca = '') {
-    const { rows } = await this.pool.query(
-      'SELECT nome FROM ingredientes WHERE usuario_id = $1 ORDER BY criado_em',
-      [usuarioId],
+    const { rows } = await comTimeout(
+      this.pool.query('SELECT nome FROM ingredientes WHERE usuario_id = $1 ORDER BY criado_em', [
+        usuarioId,
+      ]),
+      2000,
     );
     const ingredientes = [...new Set(rows.map((r) => r.nome))];
     const locais = await this.locais();
