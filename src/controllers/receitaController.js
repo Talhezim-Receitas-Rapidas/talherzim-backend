@@ -15,7 +15,18 @@ function criarReceitaController(receitaService) {
     async listarSugeridas(req, res) {
       try {
         const usuarioId = req.usuario.id;
-        const receitas = await receitaService.listarSugeridas(usuarioId);
+        const busca = req.query.busca ?? '';
+        if (
+          typeof busca !== 'string' ||
+          busca.length > 150 ||
+          (req.query.detalhes !== undefined && !['true', 'false'].includes(req.query.detalhes))
+        ) {
+          return enviarErro(res, 422, 'dados_invalidos');
+        }
+        const receitas =
+          req.query.detalhes === 'true'
+            ? await receitaService.sugerir(usuarioId, busca.trim())
+            : await receitaService.listarSugeridas(usuarioId);
         res.json(receitas);
       } catch (err) {
         console.error(err);
@@ -39,6 +50,9 @@ function criarReceitaController(receitaService) {
         }
         res.json(receita);
       } catch (err) {
+        if (/^externa-\d+$/.test(req.params.id)) {
+          return enviarErro(res, 503, 'A fonte externa está indisponível. Tente novamente.');
+        }
         console.error(err);
         if (!res.headersSent) {
           enviarErro(res, 500, 'erro_interno');

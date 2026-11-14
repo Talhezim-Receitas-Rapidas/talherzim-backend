@@ -5,7 +5,7 @@ class IngredienteModel {
     const { rows } = await pool.query(
       `INSERT INTO ingredientes (usuario_id, nome, quantidade, unidade)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em`,
+       RETURNING id, usuario_id, nome, quantidade::float AS quantidade, unidade, criado_em, atualizado_em`,
       [usuarioId, nome, quantidade, unidade],
     );
     return rows[0];
@@ -13,7 +13,7 @@ class IngredienteModel {
 
   static async listarPorUsuario(pool, usuarioId) {
     const { rows } = await pool.query(
-      `SELECT id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em
+      `SELECT id, usuario_id, nome, quantidade::float AS quantidade, unidade, criado_em, atualizado_em
        FROM ingredientes
        WHERE usuario_id = $1
        ORDER BY nome`,
@@ -24,7 +24,7 @@ class IngredienteModel {
 
   static async buscarPorId(pool, id) {
     const { rows } = await pool.query(
-      `SELECT id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em
+      `SELECT id, usuario_id, nome, quantidade::float AS quantidade, unidade, criado_em, atualizado_em
        FROM ingredientes
        WHERE id = $1`,
       [id],
@@ -37,7 +37,7 @@ class IngredienteModel {
       `UPDATE ingredientes
        SET nome = $2, quantidade = $3, unidade = $4, atualizado_em = now()
        WHERE id = $1
-       RETURNING id, usuario_id, nome, quantidade, unidade, criado_em, atualizado_em`,
+       RETURNING id, usuario_id, nome, quantidade::float AS quantidade, unidade, criado_em, atualizado_em`,
       [id, nome, quantidade, unidade],
     );
     return rows[0] || null;

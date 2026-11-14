@@ -2,6 +2,8 @@
 
 Este documento descreve os endpoints da API do Talherzim, incluindo os novos endpoints de receitas.
 
+O parâmetro `detalhes=true` em `GET /receitas/sugeridas` habilita o retorno `{ receitas, avisos, despensaVazia }`, a consulta externa e a pesquisa opcional por `busca`. Sem esse parâmetro, a resposta em array descrita abaixo é preservada. O contrato completo está em [src/openapi.yaml](../src/openapi.yaml).
+
 ## Autenticação
 
 As rotas protegidas exigem o header `Authorization` com um token JWT no formato `Bearer`:
