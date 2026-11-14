@@ -1,6 +1,12 @@
 -- Talherzim | Schema PostgreSQL (docs/schema.sql)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+CREATE TABLE IF NOT EXISTS traducoes_receitas (
+  receita_id TEXT PRIMARY KEY,
+  original TEXT NOT NULL,
+  conteudo JSONB NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS usuarios (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) NOT NULL UNIQUE,
