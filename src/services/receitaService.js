@@ -118,4 +118,4 @@ class ReceitaService {
   }
 }
 
-module.exports = { ReceitaService };
+module.exports = { ReceitaService, comTimeout };

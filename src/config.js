@@ -14,7 +14,7 @@ function databaseUrl() {
 }
 
 function corsOrigins() {
-  const raw = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  const raw = process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
   return raw
     .split(',')
     .map((origem) => origem.trim())

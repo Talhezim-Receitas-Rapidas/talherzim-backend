@@ -4,6 +4,8 @@ const { criarAuthRouter } = require('./routes/auth');
 const { criarIngredientesRouter } = require('./routes/ingredientes');
 const { criarAuthenticate } = require('./middleware/authenticate');
 const { enviarErro } = require('./http/erro');
+const { DespensaService } = require('./services/despensaService');
+const { RecipeSuggestionService } = require('./services/recipeSuggestionService');
 
 function createApp({ authService, despensaService, jwtSecret, pool, corsOrigins }) {
   const app = express();
@@ -11,23 +13,32 @@ function createApp({ authService, despensaService, jwtSecret, pool, corsOrigins 
 
   app.use(
     cors({
-      origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : true,
+      origin: corsOrigins?.length
+        ? corsOrigins
+        : (process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
+            .split(',')
+            .map((origin) => origin.trim()),
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
   );
   app.use(express.json());
   app.use('/auth', criarAuthRouter(authService, authenticate));
-  app.use('/ingredientes', criarIngredientesRouter(despensaService, authenticate));
+  if (despensaService || pool) {
+    app.use(
+      '/ingredientes',
+      criarIngredientesRouter(despensaService || new DespensaService(pool), authenticate),
+    );
+  }
 
-  // Receitas routes
-  const { ReceitaService } = require('./services/receitaService');
-  const receitaService = new ReceitaService(pool);
-  const { criarReceitasRouter } = require('./routes/receitas');
-  const receitasRouter = criarReceitasRouter(receitaService, authenticate);
-  app.use('/receitas', receitasRouter);
+  if (pool) {
+    const { criarReceitasRouter } = require('./routes/receitas');
+    app.use('/receitas', criarReceitasRouter(new RecipeSuggestionService(pool), authenticate));
+  }
 
   app.use((err, _req, res, next) => {
+    if (err.type === 'entity.parse.failed') return enviarErro(res, 400, 'json_invalido');
+    if (err.type === 'entity.too.large') return enviarErro(res, 413, 'corpo_muito_grande');
     console.error(err);
     if (res.headersSent) {
       return next(err);

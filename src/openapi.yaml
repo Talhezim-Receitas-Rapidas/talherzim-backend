@@ -6,10 +6,9 @@ info:
     Contrato da API do **Talherzim** — organizador de receitas com sugestão por
     ingredientes disponíveis.
 
-    Este documento cobre os endpoints de **autenticação** (RF01, RF02) definidos
-    para a Semana 1. Os endpoints de despensa (RF03–RF05, RF11), sugestão
-    (RF06, RF07) e receitas (RF08–RF10) serão adicionados nas fases seguintes do
-    roadmap.
+    Inclui autenticação, despensa, sugestões, pesquisa e detalhes de receitas
+    locais e externas. As receitas externas são consultadas na TheMealDB e os
+    detalhes são traduzidos para português quando o serviço de tradução está disponível.
 
     ## Autenticação
 
@@ -38,8 +37,7 @@ info:
     }
     ```
 
-    - `erro` é um **código estável em `snake_case`**, pensado para o cliente
-      comparar sem depender do texto da mensagem.
+    - `erro` contém um código ou uma mensagem conforme a resposta documentada.
     - `campos` lista os erros de validação por campo e vem **vazia** quando o
       erro não é de validação (ex.: credenciais inválidas, token expirado).
 
@@ -51,7 +49,7 @@ info:
       hash bcrypt (RNF02).
     - Cada usuário só acessa os próprios dados (RNF03).
   
-  version: 1.0.0
+  version: 1.1.0
   contact:
     name: Talhezim-Receitas-Rapidas
     url: https://github.com/Talhezim-Receitas-Rapidas
@@ -177,68 +175,135 @@ paths:
         '401':
           $ref: '#/components/responses/NaoAutenticado'
 
-  /receitas/sugeridas:
+  /ingredientes:
     get:
-      tags: [Receitas]
-      operationId: listarReceitasSugeridas
-      summary: Lista receitas sugeridas com base na despensa do usuário
-      description: Retorna receitas ranqueadas pela quantidade de ingredientes em comum com a despensa do usuário.
-      security:
-        - bearerAuth: []
+      summary: Lista a despensa do usuário autenticado
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
-          description: Lista de receitas sugeridas.
+          description: Ingredientes do usuário
           content:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/Receita'
-        '401':
-          $ref: '#/components/responses/NaoAutenticado'
-        '500':
-          description: Erro interno.
+                items: { $ref: '#/components/schemas/Ingrediente' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+    post:
+      summary: Cadastra um ingrediente na despensa
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IngredientePayload' }
+      responses:
+        '201':
+          description: Ingrediente criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ingrediente' }
+        '400': { $ref: '#/components/responses/JsonInvalido' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '422': { $ref: '#/components/responses/DadosInvalidos' }
+
+  /ingredientes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      summary: Atualiza um ingrediente do usuário
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IngredientePayload' }
+      responses:
+        '200':
+          description: Ingrediente atualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ingrediente' }
+        '400': { $ref: '#/components/responses/JsonInvalido' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '404': { $ref: '#/components/responses/RecursoAusente' }
+        '422': { $ref: '#/components/responses/DadosInvalidos' }
+    delete:
+      summary: Remove um ingrediente do usuário
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Ingrediente removido }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '404': { $ref: '#/components/responses/RecursoAusente' }
+
+  /receitas/sugeridas:
+    get:
+      summary: Lista sugestões da despensa ou pesquisa receitas por termo
+      description: Sem detalhes, preserva a resposta em array. Com detalhes=true, inclui busca externa, pesquisa por termo e avisos com HTTP 200.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: detalhes
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+        - name: busca
+          in: query
+          required: false
+          schema: { type: string, maxLength: 150 }
+          example: pepino
+      responses:
+        '200':
+          description: Resultado da consulta
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erro'
+                oneOf:
+                  - type: array
+                    items: { $ref: '#/components/schemas/Receita' }
+                  - type: object
+                    required: [receitas, avisos, despensaVazia]
+                    properties:
+                      receitas:
+                        type: array
+                        items: { $ref: '#/components/schemas/Receita' }
+                      avisos:
+                        type: array
+                        items: { type: string }
+                      despensaVazia: { type: boolean }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '422':
+          description: Busca inválida ou acima de 150 caracteres
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
 
   /receitas/{id}:
     get:
-      tags: [Receitas]
-      operationId: obterReceitaPorId
-      summary: Obtém detalhe de uma receita pelo ID
-      description: Retorna os detalhes de uma receita, incluindo seus ingredientes e modo de preparo.
-      security:
-        - bearerAuth: []
+      summary: Obtém os detalhes de uma receita local ou externa
+      description: IDs do dataset permanecem aceitos após a importação. Falha de tradução preserva o original e acrescenta avisoTraducao.
+      security: [{ bearerAuth: [] }]
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
-          schema:
-            type: string
-            format: uuid
+          schema: { type: string }
+          example: externa-53239
       responses:
         '200':
-          description: Detalhe da receita.
+          description: Receita e detalhes disponíveis
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Receita'
-        '401':
-          $ref: '#/components/responses/NaoAutenticado'
-        '404':
-          description: Receita não encontrada.
+              schema: { $ref: '#/components/schemas/Receita' }
+        '401': { $ref: '#/components/responses/NaoAutenticado' }
+        '404': { $ref: '#/components/responses/RecursoAusente' }
+        '503':
+          description: A fonte externa está indisponível
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Erro'
-        '500':
-          description: Erro interno.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Erro'
+              schema: { $ref: '#/components/schemas/Erro' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -250,6 +315,57 @@ components:
         `Authorization: Bearer <jwt>`.
 
   schemas:
+    IngredientePayload:
+      type: object
+      required: [nome]
+      properties:
+        nome: { type: string, minLength: 1, maxLength: 150 }
+        quantidade: { type: number, minimum: 0, maximum: 99999999.99, nullable: true, description: Quantidade opcional. Valores positivos devem ser de pelo menos 0.01. }
+        unidade: { type: string, maxLength: 20, nullable: true }
+
+    Ingrediente:
+      allOf:
+        - $ref: '#/components/schemas/IngredientePayload'
+        - type: object
+          required: [id]
+          properties:
+            id: { type: string, format: uuid }
+            usuario_id: { type: string, format: uuid }
+
+    Receita:
+      type: object
+      required: [id, nome, ingredientes]
+      properties:
+        id: { type: string }
+        nome: { type: string }
+        externa: { type: boolean }
+        fonte: { type: string }
+        fonte_id: { type: string, nullable: true }
+        fonteUrl: { type: string, nullable: true }
+        origem: { type: string, nullable: true }
+        imagem: { type: string, nullable: true }
+        imagem_url: { type: string, nullable: true }
+        correspondencias: { type: integer, minimum: 0 }
+        totalIngredientes: { type: integer, minimum: 0 }
+        ingredienteConsultado: { type: string }
+        idioma: { type: string, enum: [en, pt-BR] }
+        traducaoAutomatica: { type: boolean }
+        avisoTraducao: { type: string }
+        ingredientes:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: object
+                required: [nome]
+                properties:
+                  nome: { type: string }
+                  quantidade: { type: string }
+        modo_preparo: { type: string, nullable: true }
+        modoPreparo:
+          type: array
+          items: { type: string }
+
     Usuario:
       type: object
       description: Representação pública do usuário. Nunca inclui a senha.
@@ -314,13 +430,7 @@ components:
       properties:
         erro:
           type: string
-          description: Código estável do erro (snake_case).
-          enum:
-            - dados_invalidos
-            - email_duplicado
-            - credenciais_invalidas
-            - nao_autenticado
-            - token_invalido
+          description: Código de erro ou mensagem descrita na resposta do endpoint.
           example: dados_invalidos
         campos:
           type: array
@@ -347,6 +457,16 @@ components:
           example: E-mail inválido.
 
   responses:
+    JsonInvalido:
+      description: JSON malformado. Código json_invalido.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    RecursoAusente:
+      description: Recurso inexistente, ID inválido ou ingrediente de outro usuário
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
     DadosInvalidos:
       description: |
         Payload inválido (campos ausentes, e-mail malformado ou senha curta).
