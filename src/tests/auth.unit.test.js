@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const { validarCredenciais } = require('../http/validacaoAuth');
 const { AuthService, AuthError } = require('../services/authService');
 const { criarAuthenticate, autorizarUsuario } = require('../middleware/authenticate');
-const { enviarErro } = require('../http/erro');
 
 describe('Testes Unitários - S1-04 Autenticação', () => {
   describe('validarCredenciais', () => {

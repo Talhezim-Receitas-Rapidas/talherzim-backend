@@ -4,6 +4,12 @@
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- necessário para gen_random_uuid()
 
+CREATE TABLE IF NOT EXISTS traducoes_receitas (
+  receita_id TEXT PRIMARY KEY,
+  original TEXT NOT NULL,
+  conteudo JSONB NOT NULL
+);
+
 -- =========================================================
 -- USUARIOS (RF01, RF02, RNF02)
 -- =========================================================
